@@ -334,7 +334,7 @@ export const MediaBuyerForm = () => {
             <div className="px-8 py-10 space-y-6">
               <div className="flex items-start gap-6">
                 <Image
-                  src="/nick.jpeg"
+                  src="/nick.png"
                   alt="Nick Torson"
                   width={96}
                   height={96}
