@@ -2,8 +2,7 @@
 
 import React, { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '../ui/card';
-import { Alert, AlertDescription } from '../ui/alert';
-import { Loader2 } from 'lucide-react';
+import Image from 'next/image';
 
 interface VerticalCategory {
   name: string;
@@ -102,43 +101,14 @@ interface FormData {
   selectedVerticalCategories: string[];
   selectedSubcategories: Record<string, string[]>;
   otherVertical: string;
-  selectedLeadVerticals: string[];
   selectedNetworks: string[];
   spendRanges: Record<string, string>;
-  otherLeadVertical: string;
+  otherPlatform: string;
   monthlySpend: string;
   averageRoas: string;
   teamSize: string;
   profitShare: string;
-  otherPlatform: string;
 }
-
-const verticals = [
-  'E-commerce',
-  'SaaS/Technology',
-  'Finance/Fintech',
-  'Healthcare',
-  'Education',
-  'Gaming',
-  'Travel',
-  'Real Estate',
-  'Consumer Goods',
-  'B2B Services',
-  'Lead Generation'
-] as const;
-
-const leadVerticals = [
-  'Solar',
-  'Roofing',
-  'Windows',
-  'Gutters',
-  'Other Home Services',
-  'Debt',
-  'Medicare',
-  'Health Insurance',
-  'Auto',
-  'Other'
-] as const;
 
 const networks = [
   'Facebook/Instagram Ads',
@@ -147,14 +117,6 @@ const networks = [
   'TikTok Ads',
   'Native Ads (Taboola, Outbrain)',
   'Other'
-] as const;
-
-const spendCategories = [
-  '0-10k/month',
-  '10k-50k/month',
-  '50k-100k/month',
-  '100k-500k/month',
-  '500k+/month'
 ] as const;
 
 export const MediaBuyerForm = () => {
@@ -166,19 +128,16 @@ export const MediaBuyerForm = () => {
     selectedVerticalCategories: [],
     selectedSubcategories: {},
     otherVertical: '',
-    selectedLeadVerticals: [],
     selectedNetworks: [],
     spendRanges: {},
-    otherLeadVertical: '',
+    otherPlatform: '',
     monthlySpend: '',
     averageRoas: '',
     teamSize: '',
-    profitShare: '',
-    otherPlatform: ''
+    profitShare: ''
   });
 
   const [formErrors, setFormErrors] = useState({
-    leadVerticals: false,
     monthlySpend: false,
     averageRoas: false,
     teamSize: false,
@@ -186,10 +145,6 @@ export const MediaBuyerForm = () => {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState<{
-    type: 'success' | 'error' | null;
-    message: string | null;
-  }>({ type: null, message: null });
 
   const handleVerticalToggle = (vertical: string) => {
     setFormData(prev => {
@@ -219,34 +174,6 @@ export const MediaBuyerForm = () => {
         selectedSubcategories: newSubcategories
       };
     });
-  };
-
-  const handleLeadVerticalToggle = (vertical: string) => {
-    setFormData(prev => {
-      const newLeadVerticals = prev.selectedLeadVerticals.includes(vertical)
-        ? prev.selectedLeadVerticals.filter(v => v !== vertical)
-        : [...prev.selectedLeadVerticals, vertical];
-
-      if (vertical === 'Other' && !newLeadVerticals.includes('Other')) {
-        return {
-          ...prev,
-          selectedLeadVerticals: newLeadVerticals,
-          otherLeadVertical: ''
-        };
-      }
-
-      return {
-        ...prev,
-        selectedLeadVerticals: newLeadVerticals
-      };
-    });
-  };
-
-  const handleOtherLeadVerticalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({
-      ...prev,
-      otherLeadVertical: e.target.value
-    }));
   };
 
   const handleNetworkToggle = (network: string) => {
@@ -303,16 +230,11 @@ export const MediaBuyerForm = () => {
 
   const validateForm = () => {
     const errors = {
-      leadVerticals: false,
       monthlySpend: false,
       averageRoas: false,
       teamSize: false,
       profitShare: false
     };
-
-    if (formData.selectedVerticalCategories.includes('Lead Generation') && formData.selectedLeadVerticals.length === 0) {
-      errors.leadVerticals = true;
-    }
 
     if (!formData.monthlySpend) {
       errors.monthlySpend = true;
@@ -336,8 +258,6 @@ export const MediaBuyerForm = () => {
     if (!validateForm()) return;
 
     setIsSubmitting(true);
-    setSubmitStatus({ type: null, message: null });
-
     try {
       const response = await fetch('/api/submit-form', {
         method: 'POST',
@@ -350,10 +270,6 @@ export const MediaBuyerForm = () => {
       const data = await response.json();
 
       if (data.success) {
-        setSubmitStatus({
-          type: 'success',
-          message: 'Form submitted successfully!'
-        });
         // Optional: Reset form
         // setFormData({
         //   selectedVerticals: [],
@@ -366,10 +282,7 @@ export const MediaBuyerForm = () => {
         throw new Error(data.message || 'Failed to submit form');
       }
     } catch (error) {
-      setSubmitStatus({
-        type: 'error',
-        message: error instanceof Error ? error.message : 'Failed to submit form'
-      });
+      console.error('Error submitting form:', error instanceof Error ? error.message : 'Failed to submit form');
     } finally {
       setIsSubmitting(false);
     }
@@ -420,10 +333,12 @@ export const MediaBuyerForm = () => {
           <div className="bg-[#1A1A1A] border-b border-gray-800/50">
             <div className="px-8 py-10 space-y-6">
               <div className="flex items-start gap-6">
-                <img
-                  src="/nick.jpeg" // Add this image to your public folder
+                <Image
+                  src="/nick.jpeg"
                   alt="Nick Torson"
-                  className="w-24 h-24 rounded-lg object-cover"
+                  width={96}
+                  height={96}
+                  className="rounded-lg object-cover"
                 />
                 <div className="space-y-2">
                   <h3 className="text-[20px] font-light text-white/90">
@@ -436,11 +351,11 @@ export const MediaBuyerForm = () => {
               </div>
               
               <p className="text-white/80 text-[15px] leading-relaxed">
-                As one of the industry's most successful media buying coaches, I've mentored hundreds of buyers to 7-figure success, including coaching Robby Blanchard - known as the #1 affiliate in the world. My expertise isn't just theory - I've personally generated over $500M in revenue through paid traffic and continue to actively scale campaigns.
+                As one of the industry&apos;s most successful media buying coaches, I&apos;ve mentored hundreds of buyers to 7-figure success, including coaching Robby Blanchard - known as the #1 affiliate in the world. My expertise isn&apos;t just theory - I&apos;ve personally generated over $500M in revenue through paid traffic and continue to actively scale campaigns.
               </p>
               
               <p className="text-white/80 text-[15px] leading-relaxed">
-                At C2F, I bring the same mentorship approach to our network. Our media buyers get direct access to my proven strategies, optimization techniques, and scaling methods that have helped create multiple 7-figure success stories. This isn't just a network - it's a partnership focused on scaling your campaigns with proven methods that work.
+                At C2F, I bring the same mentorship approach to our network. Our media buyers get direct access to my proven strategies, optimization techniques, and scaling methods that have helped create multiple 7-figure success stories. This isn&apos;t just a network - it&apos;s a partnership focused on scaling your campaigns with proven methods that work.
               </p>
               
               <div className="space-y-3 pt-2">
@@ -739,6 +654,14 @@ export const MediaBuyerForm = () => {
             </section>
           </CardContent>
         </Card>
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="w-full h-12 bg-red-600 text-white rounded font-medium
+                   hover:bg-red-700 transition-colors disabled:opacity-50 mt-6"
+        >
+          {isSubmitting ? 'Submitting...' : 'Submit Application'}
+        </button>
       </form>
     </div>
   );

@@ -1,8 +1,27 @@
 import { google } from 'googleapis'
 
+interface FormData {
+  contactName: string;
+  contactEmail: string;
+  skypeId: string;
+  telegramId: string;
+  selectedVerticalCategories: string[];
+  selectedSubcategories: Record<string, string[]>;
+  otherVertical: string;
+  selectedLeadVerticals: string[];
+  selectedNetworks: string[];
+  spendRanges: Record<string, string>;
+  otherLeadVertical: string;
+  monthlySpend: string;
+  averageRoas: string;
+  teamSize: string;
+  profitShare: string;
+  otherPlatform: string;
+}
+
 export async function POST(request: Request) {
   try {
-    const formData = await request.json()
+    const formData: FormData = await request.json()
     console.log('Received form data:', formData)
 
     // Format data for Google Sheets
@@ -12,11 +31,11 @@ export async function POST(request: Request) {
       formData.contactEmail,
       formData.telegramId,
       formData.skypeId,
-      formData.selectedVerticals.join(', '),
+      formData.selectedVerticalCategories.join(', '),
       formData.selectedLeadVerticals.join(', '),
       formData.otherLeadVertical || '',
       formData.selectedNetworks.join(', '),
-      formData.selectedNetworks.map(network => 
+      formData.selectedNetworks.map((network: string) => 
         network === 'Other' 
           ? `${formData.otherPlatform}: ${formData.spendRanges[network]}`
           : `${network}: ${formData.spendRanges[network]}`
